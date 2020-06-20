@@ -29,6 +29,16 @@ class ValidateAddressesResponse
         return array_map(function (array $validationResult) {
             $errors = [];
             $warnings = [];
+            if (isset($this->responseBody['ValidateAddressesResponse']['GeneralError']) ) {
+                $err = $this->responseBody['ValidateAddressesResponse']['GeneralError'];
+                $errors[] = new Error($err['ErrorCode'], $err['ErrorSeverity']);
+                return new ValidatedAddress(
+                    Address::fromResponse([]),
+                    $this->originalAddresses[0],
+                    $errors,
+                    $warnings
+                );
+            }
 
             foreach ($validationResult['Error'] ?? [] as $error) {
                 if ($error['ErrorSeverity'] === 'warning') {
