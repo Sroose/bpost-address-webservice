@@ -27,26 +27,40 @@ class ValidateAddressesRequest
     public function getBody(): array
     {
         $addresses = array_map(function (Address $address, int $i) {
-            return [
-                '@id' => $i,
-                'PostalAddress' => [
-                    'DeliveryPointLocation' => [
-                        'StructuredDeliveryPointLocation' => [
-                            'StreetName' => $address->streetName,
-                            'StreetNumber' => $address->streetNumber,
-                            'BoxNumber' => $address->boxNumber,
+
+            $addressInput = [];
+            if (isset($address->unstructuredAddressLines)) {
+                $addressInput = [
+                    '@id' => $i,
+                    'AddressBlockLines' => [
+                        'UnstructuredAddressLine' => $address->unstructuredAddressLines
+                    ],
+                    'DeliveringCountryISOCode' => $address->country,
+                ];
+            } else {
+                $addressInput = [
+                    '@id' => $i,
+                    'PostalAddress' => [
+                        'DeliveryPointLocation' => [
+                            'StructuredDeliveryPointLocation' => [
+                                'StreetName' => $address->streetName,
+                                'StreetNumber' => $address->streetNumber,
+                                'BoxNumber' => $address->boxNumber,
+                            ],
+                        ],
+                        'PostalCodeMunicipality' => [
+                            'StructuredPostalCodeMunicipality' => [
+                                'PostalCode' => $address->postalCode,
+                                'MunicipalityName' => $address->municipalityName,
+                            ],
                         ],
                     ],
-                    'PostalCodeMunicipality' => [
-                        'StructuredPostalCodeMunicipality' => [
-                            'PostalCode' => $address->postalCode,
-                            'MunicipalityName' => $address->municipalityName,
-                        ],
-                    ],
-                ],
-                'DeliveringCountryISOCode' => $address->country,
-            ];
+                    'DeliveringCountryISOCode' => $address->country,
+                ];
+            }
+            return $addressInput;
         }, $this->addresses, array_keys(array_values($this->addresses)));
+            
 
         return [
             'ValidateAddressesRequest' => [
