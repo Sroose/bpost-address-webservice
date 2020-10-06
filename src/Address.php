@@ -25,6 +25,9 @@ class Address
     /** @var array */
     public $coords;
 
+    /** @var array */
+    public $unstructuredAddressLines;
+
     protected function __construct(array $attributes)
     {
         foreach ($attributes as $attribute => $value) {
